@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.neuedu.mapper.PrescriptionMapper">
+	<!-- 根据患者的id查询已缴费的药品信息 -->
+	<select id="getDrugInfoByRegisterIdAndState" resultType="map">
+		SELECT  p.id, d.`drug_code`,d.`drug_name`,d.`drug_format`,
+			d.`drug_unit`,d.`manufacturer`,d.`drug_price`,p.`drug_number`
+			FROM prescription p, drug_info d
+			WHERE p.drug_id = d.id
+			AND p.register_id = #{registerId}
+			AND p.`drug_state` = '已缴费'
+	</select>
+	<!-- 更新检查项目状态 -->
+	<update id="updateItemState">
+		UPDATE prescription SET drug_state=#{state} where id=#{id}
+	</update>
+	<!-- 根据病历号查询'已开立'状态的处方信息 -->
+	<select id="getPrescriptionByRegisterIdAndState" resultType="map">
+		SELECT  p.id, p.drug_state,p.creation_time item_create_time, 
+			d.drug_code item_code,d.drug_name item_name,
+			d.drug_format item_format,d.drug_price item_price,
+			d.drug_type item_type 
+			FROM prescription p, drug_info d
+			WHERE p.drug_id = d.id
+			<if test="registerId!=null">
+		   		and register_id=#{registerId,jdbcType=INTEGER}
+		   	</if>
+		   	<if test="state!=null and state!='' ">
+		   		and drug_state=#{state,jdbcType=VARCHAR}
+		   	</if>
+	</select>
+	<!-- 保存处方信息 -->
+	<insert id="savePrescription" parameterType="map">
+		INSERT INTO prescription
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null and id != '' ">
+    			id,
+	    	</if>
+			<if test="registerId != null and registerId != '' ">
+    			register_id,
+	    	</if>
+			<if test="drugId != null and drugId != '' ">
+    			drug_id,
+	    	</if>
+			<if test="drug_usage != null and drug_usage != '' ">
+    			drug_usage,
+	    	</if>
+			<if test="drug_number != null and drug_number != '' ">
+    			drug_number,
+	    	</if>
+			<if test="1==1 ">
+    			creation_time,
+	    	</if>
+			<if test="drug_state != null and drug_state != '' ">
+    			drug_state,
+	    	</if>
+	    </trim>
+	    values
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null and id != '' ">
+    			null,
+	    	</if>
+			<if test="registerId != null and registerId != '' ">
+    			#{registerId,jdbcType=INTEGER},
+	    	</if>
+			<if test="drugId != null and drugId != '' ">
+    			#{drugId,jdbcType=INTEGER},
+	    	</if>
+			<if test="drug_usage != null and drug_usage != '' ">
+    			#{drug_usage,jdbcType=VARCHAR},
+	    	</if>
+			<if test="drug_number != null and drug_number != '' ">
+    			#{drug_number,jdbcType=INTEGER },
+	    	</if>
+			<if test="1==1 ">
+    			now(),
+	    	</if>
+			<if test="drug_state != null and drug_state != '' ">
+    			#{drug_state,jdbcType=VARCHAR},
+	    	</if>
+	    </trim>
+	</insert>
+</mapper>

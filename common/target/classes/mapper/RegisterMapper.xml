@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.neuedu.mapper.RegisterMapper">
+	<!-- 根据条件查询处方已缴费的患者信息 -->
+	<select id="getRegisterByDrugState" resultType="map">
+		
+		SELECT * FROM register 
+			WHERE id IN (SELECT DISTINCT register_id FROM prescription WHERE drug_state = '已缴费')
+			
+			<if test="caseNumber != null and caseNumber != ''">
+				and case_number = #{caseNumber}
+			</if>
+			<if test="realName != null and realName != ''">
+				and real_name = #{realName}
+			</if>
+			
+	</select>
+	<!-- 更新挂号信息状态为2 -->
+	<update id="updateRegisterState">
+		update register set visit_state=2 where id=#{id }
+	</update>
+	<!-- 根据状态和姓名、病历号取得当天患者信息（分页、查询） -->
+	<select id="getPatientByState" resultType="java.util.Map">
+		SELECT *
+		FROM register
+			<where>
+			
+				<if test="employee_id!=null and employee_id!=''">
+					AND employee_id = #{employee_id}
+				</if>
+				<if test="case_number!=null and case_number!=''">
+					AND case_number = #{case_number}
+				</if>
+				<if test="real_name!=null and real_name!=''">
+					AND real_name = #{real_name}
+				</if>
+			</where> 
+			AND visit_state in (1,2,3)
+			ORDER BY visit_date DESC
+	</select>	
+	<!-- 根据病历号、患者姓名查询患者信息 -->
+	<select id="getRegisterByCaseAndName" resultType="map">
+		SELECT * FROM register 
+			<where>
+				<if test="caseNumber != null and caseNumber != ''">
+					and case_number = #{caseNumber}
+				</if>
+				<if test="realName != null and realName != ''">
+					and real_name = #{realName}
+				</if>
+			</where>
+	</select>
+	<!-- 根据挂号状态，查询等待患者列表 -->
+	<select id="getWaitPatientList" parameterType="map" resultType="map">
+		SELECT * FROM register 
+			WHERE employee_id=#{employeeId} 
+			AND DATE(visit_date) = DATE(NOW())
+			AND visit_state=1
+			<if test="caseNumber != null and caseNumber != ''">
+				and case_number = #{caseNumber}
+			</if>
+			<if test="realName != null and realName != ''">
+				and real_name = #{realName}
+			</if>
+	</select>
+	<!-- 根据挂号状态，查询人数 -->
+	<select id="getCountByEmployeeIdAndState"  resultType="int">
+		SELECT COUNT(*) FROM register 
+			WHERE employee_id=#{employeeId} 
+			AND DATE(visit_date) = DATE(NOW())
+			AND visit_state=#{visitState}
+	</select>
+	<!-- 获得最大病历号 -->
+	<select id="getMaxCaseNumber" resultType="int">
+		SELECT MAX(case_number) FROM register
+	</select>
+	
+	<!-- 更加医生编号和午别，查询当天该医生已用的号额 -->
+	<select id="getUsedNumberByEmployeeIdAndNoon" resultType="int">
+		SELECT COUNT(*) FROM register 
+			WHERE employee_id=#{empId}  
+			AND noon = #{noon}
+			AND DATE(visit_date) = DATE(NOW())
+			AND visit_state &lt; 3
+	</select>
+	<!-- 保存挂号信息 -->
+	<insert id="saveRegister" parameterType="map">
+		insert into register 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null and id != '' ">
+    			id,
+	    	</if>
+	    	<if test="case_number != null and case_number !='' ">
+	    		case_number,
+	    	</if>
+	    	<if test="real_name != null and real_name !='' ">
+	    		real_name,
+	    	</if>
+	    	<if test="gender != null and gender !='' ">
+	    		gender,
+	    	</if>
+	    	<if test="card_number != null and card_number !='' ">
+	    		card_number,
+	    	</if>
+	    	<if test="birthday != null and birthday !='' ">
+	    		birthday,
+	    	</if>
+	    	<if test="age != null and age !='' ">
+	    		age,
+	    	</if>
+	    	<if test="age_type != null and age_type !='' ">
+	    		age_type,
+	    	</if>
+	    	<if test="home_address != null and home_address != '' ">
+	    		home_address,
+	    	</if>
+	    	<if test="visit_date != null ">
+	    		visit_date,
+	    	</if>    	
+	    	<if test="noon != null and noon != '' ">
+	    		noon,
+	    	</if>
+	    	<if test="deptment_id != null and deptment_id != '' ">
+	    		deptment_id,
+	    	</if>
+	    	<if test="employee_id != null and employee_id !='' ">
+	    		employee_id,
+	    	</if>
+	    	<if test="regist_level_id != null and regist_level_id !='' ">
+	    		regist_level_id,
+	    	</if>
+	    	<if test="settle_category_id != null and settle_category_id !='' ">
+	    		settle_category_id,
+	    	</if>
+	    	<if test="is_book != null and is_book != '' ">
+	    		is_book,
+	    	</if>
+	    	<if test="regist_method != null and regist_method !='' ">
+	    		regist_method,
+	    	</if>
+	    	<if test="regist_money != null and regist_money != '' ">
+	    		regist_money,
+	    	</if>
+	    	<if test="visit_state != null  and visit_state !='' ">
+	    		visit_state,
+	    	</if>
+		</trim>
+		values
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null and id != '' ">
+	    		#{id,jdbcType=INTEGER},
+	    	</if>
+	    	<if test="case_number != null and case_number !='' ">
+	    		#{case_number,jdbcType=VARCHAR},
+	    	</if>
+	    	<if test="real_name != null and real_name !='' ">
+	    		#{real_name,jdbcType=VARCHAR},
+	    	</if>
+	    	<if test="gender != null and gender !='' ">
+	    		#{gender,jdbcType=VARCHAR},
+	    	</if>
+	    	<if test="card_number != null and card_number !='' ">
+	    		#{card_number,jdbcType=VARCHAR},
+	    	</if>
+	    	<if test="birthday != null and birthday !='' ">
+	    		#{birthday,jdbcType=DATE},
+	    	</if>
+	    	<if test="age != null and age !='' ">
+	    		#{age,jdbcType=INTEGER},
+	    	</if>
+	    	<if test="age_type != null and age_type !='' ">
+	    		#{age_type,jdbcType=VARCHAR},
+	    	</if>
+	    	<if test="home_address != null and home_address != '' ">
+	    		#{home_address,jdbcType=VARCHAR},
+	    	</if>
+	    	<if test="visit_date != null ">
+	    		#{visit_date,jdbcType=TIMESTAMP},
+	    	</if>    	
+	    	<if test="noon != null and noon != '' ">
+	    		#{noon,jdbcType=VARCHAR},
+	    	</if>
+	    	<if test="deptment_id != null and deptment_id != '' ">
+	    		#{deptment_id,jdbcType=INTEGER},
+	    	</if>
+	    	<if test="employee_id != null and employee_id !='' ">
+	    		#{employee_id,jdbcType=INTEGER},
+	    	</if>
+	    	<if test="regist_level_id != null and regist_level_id !='' ">
+	    		#{regist_level_id,jdbcType=INTEGER},
+	    	</if>
+	    	<if test="settle_category_id != null and settle_category_id !='' ">
+	    		#{settle_category_id,jdbcType=INTEGER},
+	    	</if>
+	    	<if test="is_book != null and is_book != '' ">
+	    		#{is_book,jdbcType=VARCHAR},
+	    	</if>
+	    	<if test="regist_method != null and regist_method !='' ">
+	    		#{regist_method,jdbcType=VARCHAR},
+	    	</if>
+	    	<if test="regist_money != null and regist_money != '' ">
+	    		#{regist_money,jdbcType=DECIMAL},
+	    	</if>
+	    	<if test="visit_state != null and visit_state !='' ">
+	    		#{visit_state,jdbcType=INTEGER},
+	    	</if>
+		</trim>
+	</insert>
+</mapper>

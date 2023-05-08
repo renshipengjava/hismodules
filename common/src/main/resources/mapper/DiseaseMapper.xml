@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.neuedu.mapper.DiseaseMapper">
+	<!-- 按条件查询疾病列表 -->
+	<select id="getDisease" parameterType="map" resultType="map">
+		SELECT * FROM disease 
+			<where>
+				<if test="disease_name !=null and disease_name != ''">
+					and disease_name like '%${disease_name}%'
+				</if>
+				<if test="disease_code !=null and disease_code != ''">
+					and disease_code=#{disease_code}
+				</if>
+				<if test="diseaseICD !=null and diseaseICD != ''">
+					and diseaseICD=#{diseaseICD}
+				</if>
+			</where>
+			limit 0,10
+	</select>
+</mapper>

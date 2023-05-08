@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.beihua.mapper.DepartmentMapper">
+	<!-- 查询所有部门信息 -->
+	<select id="getDeptList" resultType="map">
+		SELECT * FROM department
+	</select>
+</mapper>

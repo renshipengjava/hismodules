@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.neuedu.mapper.MedicalRecordMapper">
+	<!-- 更新病历信息 -->
+	<update id="updateMedicalRecord"  parameterType="map">
+		update medical_record 
+			<set>
+				<trim suffixOverrides=",">
+					<if test="diagnosis != null and diagnosis != '' ">
+						diagnosis=#{diagnosis},
+					</if>
+					<if test="cure != null and cure != '' ">
+						cure=#{cure},
+					</if>
+				</trim>
+			</set>
+			where register_id=#{register_id}
+	</update>
+
+	<!-- 保存病历信息 -->
+	<insert id="saveMedicalRecord" parameterType="map">
+		INSERT INTO medical_record 
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="id != null and id != '' ">
+	    			id,
+		    	</if>
+				<if test="register_id != null and register_id != '' ">
+	    			register_id,
+		    	</if>
+				<if test="readme != null and readme != '' ">
+	    			readme,
+		    	</if>
+				<if test="present != null and present != '' ">
+	    			present,
+		    	</if>
+				<if test="present_treat != null and present_treat != '' ">
+	    			present_treat,
+		    	</if>
+				<if test="history != null and history != '' ">
+	    			history,
+		    	</if>
+				<if test="allergy != null and allergy != '' ">
+	    			allergy,
+		    	</if>
+				<if test="physique != null and physique != '' ">
+	    			physique,
+		    	</if>
+				<if test="proposal != null and proposal != '' ">
+	    			proposal,
+		    	</if>
+				<if test="careful != null and careful != '' ">
+	    			careful,
+		    	</if>
+				<if test="diagnosis != null and diagnosis != '' ">
+	    			diagnosis,
+		    	</if>
+				<if test="cure != null and cure != '' ">
+	    			cure,
+		    	</if>
+		    </trim>
+		    values
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="id != null and id != '' ">
+	    			#{id,jdbcType=INTEGER},
+		    	</if>
+				<if test="register_id != null and register_id != '' ">
+	    			#{register_id, jdbcType=INTEGER},
+		    	</if>
+				<if test="readme != null and readme != '' ">
+	    			#{readme, jdbcType=VARCHAR },
+		    	</if>
+				<if test="present != null and present != '' ">
+	    			#{present, jdbcType=VARCHAR },
+		    	</if>
+				<if test="present_treat != null and present_treat != '' ">
+	    			#{present_treat, jdbcType=VARCHAR },
+		    	</if>
+				<if test="history != null and history != '' ">
+	    			#{history, jdbcType=VARCHAR },
+		    	</if>
+				<if test="allergy != null and allergy != '' ">
+	    			#{allergy, jdbcType=VARCHAR },
+		    	</if>
+				<if test="physique != null and physique != '' ">
+	    			#{physique, jdbcType=VARCHAR },
+		    	</if>
+				<if test="proposal != null and proposal != '' ">
+	    			#{proposal, jdbcType=VARCHAR },
+		    	</if>
+				<if test="careful != null and careful != '' ">
+	    			#{careful, jdbcType=VARCHAR },
+		    	</if>
+				<if test="diagnosis != null and diagnosis != '' ">
+	    			#{diagnosis, jdbcType=VARCHAR },
+		    	</if>
+				<if test="cure != null and cure != '' ">
+	    			#{cure, jdbcType=VARCHAR },
+		    	</if>
+		    </trim>
+		    <selectKey keyProperty="id" order="AFTER" resultType="int">
+		    	SELECT LAST_INSERT_ID()
+		    </selectKey>
+	</insert>
+	
+</mapper>

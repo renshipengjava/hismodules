@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.neuedu.mapper.CheckRequestMapper">
+	<!-- 根据id查询已出结果的检查项目 -->
+	<select id="getCheckRequestById" resultType="map">
+		SELECT c.* ,e.realname
+			FROM check_request c, employee e 
+			WHERE c.check_employee_id = e.id and c.id=#{id}
+	</select>
+	<!-- 取得完成检查信息（分页、查询） -->
+	<select id="getFinishCheck" resultType="java.util.Map">
+	SELECT r.* FROM register r ,  (SELECT DISTINCT register_id,check_state FROM check_request WHERE check_state="执行完成") c 
+		WHERE r.id = c.register_id
+		 	<if test="case_number!=null and case_number!=''">
+				AND r.case_number = #{case_number}
+			</if>
+			<if test="real_name!=null and real_name!=''">
+				AND r.real_name = #{real_name}
+			</if>
+	</select>	 
+	<!-- 根据患者id得到已经检查完成的检查项目 -->
+	<select id="getFinishCheckByRegistid" parameterType="int" resultType="java.util.Map">
+		SELECT r.*,m.tech_code item_code,m.tech_name item_name,m.tech_price item_price,m.price_type item_type
+			FROM check_request r , medical_technology m
+			WHERE r.medical_technology_id = m.id 
+				AND r.check_state="执行完成"
+				AND r.register_id=#{id}
+	</select>	
+	<!-- 提交检查结果 -->
+	<update id="updateCheckInput" parameterType="java.lang.String">
+		UPDATE check_request
+			SET 
+				inputcheck_employee_id=#{employee_id},
+				check_state = "已出结果",
+				check_result = #{check_result}
+			WHERE id=#{id}
+	</update>
+	<!-- 修改检查信息 -->
+	<update id="updateCheckById">
+		UPDATE check_request 
+			SET check_state='执行完成',check_employee_id=#{empId},check_time=now()
+		 	where id=#{id}
+	</update>
+	<!-- 根据患者id查询对应的检查项 -->
+	<select id="getPatientCheckByRegisterId" parameterType="int" resultType="map">
+		SELECT c.id, tech_code, tech_name, tech_format, tech_price, price_type 
+			FROM check_request c,medical_technology m 
+			WHERE  c.medical_technology_id = m.id
+			AND register_id = #{registerId} AND check_state='已缴费'
+	</select>
+	<!-- 根据状态得到患者数量 -->
+	 <select id="getCheckCountByState" parameterType="string" resultType="int">
+	 	SELECT COUNT(DISTINCT register_id)  FROM check_request 
+	 		<where>
+				<if test="checkState!=null and checkState!=''">
+					AND check_state=#{checkState,jdbcType=VARCHAR}
+				</if>
+				
+	 		</where>
+	 </select>
+	 <!-- 取得等待检查信息（分页、查询） -->
+	<select id="getWaitCheck" resultType="java.util.Map">
+		SELECT r.* FROM register r ,  (SELECT DISTINCT register_id,check_state FROM check_request WHERE check_state="已缴费") c WHERE r.id = c.register_id
+		 	
+		 	<if test="case_number!=null and case_number!=''">
+				AND r.case_number = #{case_number}
+			</if>
+			<if test="real_name!=null and real_name!=''">
+				AND r.real_name = #{real_name}
+			</if>
+		ORDER BY r.visit_date
+	</select> 
+
+	<!-- 更新检查项目状态 -->
+	<update id="updateItemState">
+		UPDATE check_request SET check_state=#{state} where id=#{id}
+	</update>
+	
+
+	<!-- 根据患者id和状态查询检查项目 -->
+	<select id="getCheckByRegisterIdAndState" resultType="map">
+		SELECT c.id,c.check_state,m.tech_code item_code, m.tech_name item_name, 
+			tech_format item_format,tech_price item_price, tech_type item_type,
+			c.creation_time item_create_time,price_type 
+			FROM medical_technology m, check_request c 
+			WHERE m.id = c.medical_technology_id
+				<if test="registerId!=null">
+			   		and register_id=#{registerId,jdbcType=INTEGER}
+			   	</if>
+			   	<if test="state!=null and state!='' ">
+			   		and check_state=#{state,jdbcType=VARCHAR}
+			   	</if>
+	</select>
+	<!-- 保存检查项目信息 -->
+	<insert id="saveCheckRequest" parameterType="map">
+		INSERT INTO check_request
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+		   	<if test="registerId!=null and registerId!='' ">
+		   		register_id,
+		   	</if>
+		   	<if test="medicalTechnologyId!=null and medicalTechnologyId!='' ">
+		   		medical_technology_id,
+		   	</if>
+		   	<if test="checkInfo!=null and checkInfo!='' ">
+		   		check_info,
+		   	</if>
+		   	<if test="checkPosition!=null and checkPosition!='' ">
+		   		check_position,
+		   	</if>
+		   	<if test="checkRemark!=null and checkRemark!='' ">
+		   		check_remark,
+		   	</if>
+		   	creation_time,check_state
+		   </trim>
+		   <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+		   	<if test="registerId!=null and registerId!='' ">
+		   		#{registerId,jdbcType=VARCHAR},
+		   	</if>
+		   	<if test="medicalTechnologyId!=null and medicalTechnologyId!='' ">
+		   		#{medicalTechnologyId,jdbcType=VARCHAR},
+		   	</if>
+		   	<if test="checkInfo!=null and checkInfo!='' ">
+		   		#{checkInfo,jdbcType=VARCHAR},
+		   	</if>
+		   	<if test="checkPosition!=null and checkPosition!='' ">
+		   		#{checkPosition,jdbcType=VARCHAR},
+		   	</if>
+		   	<if test="checkRemark!=null and checkRemark!='' ">
+		   		#{checkRemark,jdbcType=VARCHAR},
+		   	</if>
+		   	now(),"已开立"
+	   </trim>
+	 </insert>
+</mapper>

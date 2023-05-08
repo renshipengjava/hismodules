@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.neuedu.mapper.DrugInfoMapper">
+	<!-- 条件查询药品信息 -->
+	<select id="getDrugInfoByCondition" resultType="map">
+		SELECT * FROM drug_info 
+			<where>
+				<if test="drugName !=null and drugName != ''">
+					and drug_name like '%${drugName}%'
+				</if>
+				<if test="mnemonicCode !=null and mnemonicCode != ''">
+					and mnemonic_code like '%${mnemonicCode}%'
+				</if>
+			</where>
+			limit 0,20
+	</select>
+</mapper>
